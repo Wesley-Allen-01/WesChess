@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chess Game</title>
+    <link rel="stylesheet" href="/static/chessboard/chessboard-1.0.0.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/static/chessboard/chessboard-1.0.0.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.js" integrity="sha512-oprzqYFJfo4Bx/nNEcSI0xo7ggJrLc+qQ6hrS3zV/Jn0C4dsg4gu+FXW/Vm0jP9CrV7e5e6dcLUYkg3imjfjbw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+    <h1>Game Room: <span id="roomID"></span></h1>
+    <h1> Welcome, <span id="username">{{.username}}</span></h1>
+    <h2>Player Color: {{.playerColor}}</h2>
+    <div id="board" style="width: 400px"></div>
+    <p id="status"></p>
+    <script>
+        // Room ID from URL
+        const roomID = window.location.pathname.split("/")[2];
+        document.getElementById("roomID").innerText = roomID;
+
+        const whiteID = "{{.whiteID}}";
+        const blackID = "{{.blackID}}";
+        const userID = "{{.user_id}}";
+        const isWhite = whiteID === userID;
+
+    
+        // Initialize Chess.js for move validation and game logic
+        const chess = new Chess(); // Chess.js library to manage game state
+    
+        // Initialize WebSocket connection
+        const ws = new WebSocket(`ws://localhost:8080/ws/${roomID}`);
+    
+        // WebSocket event handlers
+        ws.onopen = () => {
+            console.log("WebSocket connected");
+            document.getElementById("status").innerText = "Connected to game.";
+        };
+    
+        ws.onmessage = (event) => {
+            const move = JSON.parse(event.data); // Parse the move from the server
+            console.log("Received move:", move);
+    
+            // Apply the move to Chess.js
+            const result = chess.move({ from: move.source, to: move.target, promotion: 'q' });
+            if (result) {
+                board.move(`${move.source}-${move.target}`); // Update board if valid
+            } else {
+                console.error("Received invalid move from server");
+            }
+        };
+    
+        ws.onclose = () => {
+            console.log("WebSocket disconnected");
+            document.getElementById("status").innerText = "Disconnected from game.";
+        };
+    
+        ws.onerror = (error) => {
+            console.error("WebSocket error:", error);
+            document.getElementById("status").innerText = "WebSocket error.";
+        };
+    
+        // Chessboard.js configuration
+        var config = {
+            position: "start",
+            draggable: true,
+            pieceTheme: '/static/img/chesspieces/wikipedia/{piece}.png',
+            onDrop: (source, target) => {
+                console.log(`Attempting move: ${source} -> ${target}`);
+                
+                // Validate move locally using Chess.js
+                const move = chess.move({ from: source, to: target, promotion: 'q' });
+                if (move === null) {
+                    console.log("Invalid move, snapping back");
+                    return "snapback"; // Invalid move
+                }
+    
+                // Send valid move to server
+                ws.send(JSON.stringify({ source, target }));
+                console.log("Move sent to server:", { source, target });
+            },
+        };
+    
+        // Initialize the Chessboard
+        const board = Chessboard("board", config);
+    </script>
+</body>
+</html>

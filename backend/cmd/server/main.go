@@ -28,6 +28,10 @@ func main() {
 		ws.HandleConnection(c.Writer, c.Request, roomID)         
 	})
 
+	router.GET("/", func(c *gin.Context) {
+		c.Redirect(302, "/register")
+	})
+
 	router.GET("/ws-test", func(c *gin.Context) {
 		c.File("../frontend/public/ws_test.html")
 	})
@@ -103,7 +107,7 @@ func main() {
 
 		if matched {
 			log.Printf("User %d matched with room %d", userID, roomID)
-			c.JSON(http.StatusOK, gin.H{"matched": true, "room_id": roomID})
+			c.JSON(http.StatusOK, gin.H{"matched": true, "roomID": roomID})
 		} else {
 			log.Printf("User %d not matched", userID)
 			c.JSON(http.StatusOK, gin.H{"matched": false})
@@ -132,6 +136,66 @@ func main() {
 		})
 	})
 
+	router.GET("/game/:roomID", func(c *gin.Context) {
+		roomIDstr := c.Param("roomID")
+
+		// Optionally validate that the room exists
+		// if _, exists := matchmaking.GetActiveGame(roomID); !exists {
+		// 	c.JSON(http.StatusNotFound, gin.H{"error": "Game not found"})
+		// 	return
+		// }
+		// get username from user
+		roomID , err := strconv.Atoi(roomIDstr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid room ID"})
+			return
+		}
+		// print out active games map
+		log.Printf("Active games: %v", ws.ActiveGames)
+		game, exists := ws.ActiveGames[roomID]
+		if !exists {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Game not found"})
+			return
+		}
+		userIDstr, err := c.Cookie("user_id")
+		if err != nil {
+			c.Redirect(302, "/register")
+			return
+		}
+		// use userID to get username
+		var username string
+		err = db.DB.QueryRow("SELECT username FROM users WHERE id = ?", userIDstr).Scan(&username)
+		if err != nil {
+			c.HTML(500, "game.html", gin.H{
+				"error": "Failed to load user information",
+			})
+			return
+		}
+		userID, err := strconv.Atoi(userIDstr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+			return
+		}
+		var playerColor string
+		if game.WhiteID == userID {
+			playerColor = "white"
+		} else if game.BlackID == userID {
+			playerColor = "black"
+		} else {
+			playerColor = "spectator"
+		}
+
+		// Serve the game page
+		c.HTML(http.StatusOK, "game.html", gin.H{
+			"roomID": roomID,
+			"username": username,
+			"user_id": userID,
+			"whiteID": game.WhiteID,
+			"blackID": game.BlackID,
+			"playerColor": playerColor,
+		})
+	})
+
 	router.POST("/api/register", handlers.RegisterHandler(db.DB))
 
 	router.POST("/api/play", func(c *gin.Context) {
@@ -147,6 +211,13 @@ func main() {
 		}
 		matchmaking.EnqueuePlayer(int(userID))
 		log.Printf("Player %d enqueued", userID)
+		p1, p2, room, match_found := matchmaking.MatchPlayers()
+		if match_found {
+			log.Printf("Match found between players %d and %d in room %d", p1, p2, room)
+			c.JSON(http.StatusOK, gin.H{"message": "Match found", "roomID": room})
+		} else {
+			log.Printf("No match found")
+		}
 	})
 
 	router.GET("/hello", func(c *gin.Context) {

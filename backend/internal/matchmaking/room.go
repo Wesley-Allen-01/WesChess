@@ -3,6 +3,7 @@ package matchmaking
 import (
 	"WesChess/backend/internal/ws"
 	"sync"
+	"log"
 )
 
 const InitialBoardState = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
@@ -18,6 +19,9 @@ func CreateGameRoom(player1, player2 int) int {
 		Turn:       "white",
 		Status:     "in-progress",
 	}
+	log.Println("LOOK AT ME")
+	log.Printf("Created game room %d with players %d and %d", roomID, player1, player2)
+	log.Printf("Active games: %v", ws.ActiveGames)
 	return roomID
 }
 
