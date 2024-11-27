@@ -1,0 +1,27 @@
+<form id="loginForm">
+    <input type="text" id="username" name="username" placeholder="Username">
+    <input type="password" id="password" name="password" placeholder="Password">
+    <button type="submit">Login</button>
+</form>
+<script>
+    document.getElementById("loginForm").onsubmit = async (e) => {
+        e.preventDefault();
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        const response = await fetch("/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+        });
+
+        if (response.ok) {
+            alert("Logged in successfully!");
+            // Redirect to the index page
+            window.location.href = "/home";
+        } else {
+            const errorData = await response.json();
+            alert(`Failed to login: ${errorData.error}`);
+        }
+    };
+</script>
