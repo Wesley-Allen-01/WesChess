@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"database/sql"
 	"golang.org/x/crypto/bcrypt"
 	"github.com/gin-gonic/gin"
@@ -44,34 +45,81 @@ func RegisterHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusCreated, gin.H{"message": "User created successfully"})
+		c.Redirect(http.StatusFound, "/login")
+		// c.JSON(http.StatusCreated, gin.H{"message": "User created successfully"})
 	}
 }
 
 func LoginHandler(db *sql.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		var req struct {
-			Username string `json:"username"`
-			Password string `json:"password"`
-		}
+    return func(c *gin.Context) {
+        var req struct {
+            Username string `json:"username"`
+            Password string `json:"password"`
+        }
 
-		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
-			return
-		}
+        // Bind JSON payload to the struct
+        if err := c.ShouldBindJSON(&req); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+            return
+        }
 
-		var storedHash string
-		err := db.QueryRow("SELECT password FROM users WHERE username = ?", req.Username).Scan(&storedHash)
-		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
-			return
-		}
+        var userID int
+        var storedHash string
 
-		if !CheckPasswordHash(req.Password, storedHash) {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
-			return
-		}
+        // Fetch the user ID and hashed password from the database
+        err := db.QueryRow("SELECT id, password FROM users WHERE username = ?", req.Username).Scan(&userID, &storedHash)
+        if err != nil {
+            c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+            return
+        }
 
-		c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
-	}
+        // Verify the password
+        if !CheckPasswordHash(req.Password, storedHash) {
+            c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+            return
+        }
+
+        // Set the cookie with the user ID
+        c.SetCookie(
+            "user_id",              // Name
+            fmt.Sprintf("%d", userID), // Value (convert int to string)
+            3600,                   // MaxAge in seconds (1 hour in this case)
+            "/",                    // Path
+            "",                     // Domain (empty means the current domain)
+            false,                  // Secure (true if using HTTPS)
+            true,                   // HttpOnly (prevents access via JavaScript)
+        )
+
+        c.Redirect(http.StatusFound, "/home")
+    }
 }
+
+
+
+// func LoginHandler(db *sql.DB) gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		var req struct {
+// 			Username string `json:"username"`
+// 			Password string `json:"password"`
+// 		}
+
+// 		if err := c.ShouldBindJSON(&req); err != nil {
+// 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+// 			return
+// 		}
+
+// 		var storedHash string
+// 		err := db.QueryRow("SELECT password FROM users WHERE username = ?", req.Username).Scan(&storedHash)
+// 		if err != nil {
+// 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+// 			return
+// 		}
+
+// 		if !CheckPasswordHash(req.Password, storedHash) {
+// 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+// 			return
+// 		}
+
+// 		c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
+// 	}
+// }

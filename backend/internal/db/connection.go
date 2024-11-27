@@ -20,6 +20,7 @@ func InitDB() {
 
 func createTables() {
 	usersTable := `
+		DROP TABLE IF EXISTS users;
 		CREATE TABLE IF NOT EXISTS users (
     		id INTEGER PRIMARY KEY AUTOINCREMENT,
     		username TEXT NOT NULL,
@@ -32,6 +33,7 @@ func createTables() {
 	}
 
 	gamesTable := `
+		DROP TABLE IF EXISTS games;
 		CREATE TABLE IF NOT EXISTS games (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			player_white_id INTEGER NOT NULL,
