@@ -25,11 +25,13 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="static/chessboard/chessboard-1.0.0.js"></script>
     <script>
-
+        const chess = new Chess();
+        const roomID = window.location.pathname.split("/")[2];
+        
         var config = {
             position: 'start',
             draggable: true,
-            pieceTheme: 'static/img/chesspieces/wikipedia/{piece}.png',
+            pieceTheme: '/static/img/chesspieces/wikipedia/{piece}.png',
         }
         var board = Chessboard('board', config);
     </script>
