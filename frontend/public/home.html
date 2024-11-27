@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+    <script>
+        let pollInterval;
+
+        // Function to enqueue the user
+        async function joinQueue() {
+            const response = await fetch("/api/play", {
+                method: "POST",
+                credentials: "include", // Include cookies for authentication
+            });
+
+            const data = await response.json();
+            if (data.message === "Match found!") {
+                // Stop polling and redirect to the game page
+                clearInterval(pollInterval);
+                window.location.href = `/game/${data.roomID}`;
+            } else {
+                alert(data.message); // Likely "Waiting for a match..."
+            }
+        }
+
+        // Function to poll for a match
+        async function pollMatch() {
+            pollInterval = setInterval(async () => {
+                const response = await fetch("/api/check-match", {
+                    method: "GET",
+                    credentials: "include",
+                });
+
+                const data = await response.json();
+                if (data.matched) {
+                    clearInterval(pollInterval);
+                    window.location.href = `/game/${data.roomID}`;
+                }
+            }, 3000); // Poll every 3 seconds
+        }
+
+        // Start polling when the page loads
+        window.onload = pollMatch;
+    </script>
+</head>
+<body>
+    <h1>Welcome, <span id="username"></span></h1>
+    <button onclick="joinQueue()">Create Game</button>
+    <script>
+        // Fetch and display the username
+        async function fetchUsername() {
+            const response = await fetch("/api/user", { credentials: "include" });
+            const data = await response.json();
+            document.getElementById("username").innerText = data.username || "Unknown User";
+        }
+        fetchUsername();
+    </script>
+</body>
+</html>

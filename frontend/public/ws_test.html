@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+</head>
+<body>
+    <h1>WebSocket Test</h1>
+    <input type="text" id="message" placeholder="Type a message">
+    <button onclick="sendMessage()">Send</button>
+    <div id="output"></div>
+
+    <script>
+        const roomID = "test-room"; // Example room ID
+        const ws = new WebSocket(`ws://localhost:8080/ws/${roomID}`);
+
+        ws.onopen = () => {
+            console.log("WebSocket connected");
+            ws.send("Test message from client!");
+            document.getElementById("output").innerHTML += "<p>Connected to WebSocket</p>";
+        };
+
+        ws.onmessage = (event) => {
+            console.log("Message from server:", event.data);
+            document.getElementById("output").innerHTML += `<p>Server: ${event.data}</p>`;
+        };
+
+        ws.onclose = () => {
+            console.log("WebSocket disconnected");
+            document.getElementById("output").innerHTML += "<p>Disconnected</p>";
+        };
+
+        ws.onerror = (error) => {
+            console.error("WebSocket error:", error);
+            document.getElementById("output").innerHTML += "<p>Error: " + error + "</p>";
+        };
+
+        function sendMessage() {
+            const message = document.getElementById("message").value;
+            ws.send(message);
+        }
+    </script>
+</body>
+</html>
