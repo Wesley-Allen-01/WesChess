@@ -1,8 +1,28 @@
-<form id="registerForm">
-    <input type="text" id="username" name="username" placeholder="Username">
-    <input type="password" id="password" name="password" placeholder="Password">
-    <button type="submit">Register</button>
-</form>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="flex-container login">
+        <h1 class="login-title">WesChess</h1>
+
+        <h3>Register</h3>
+
+        <form id="registerForm">
+            <div class="flex-container loginForm">
+                <input type="text" id="username" name="username" placeholder="Username" class="login-type">
+                <input type="password" id="password" name="password" placeholder="Password" class="login-type">
+                <button type="submit" class="login-type">Register</button>
+            </div>
+        </form>
+    </div>
+
+</body>
+
 <script>
     document.getElementById("registerForm").onsubmit = async (e) => {
         e.preventDefault();
@@ -23,3 +43,5 @@
         }
     };
 </script>
+
+</html>

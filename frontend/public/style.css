@@ -1,0 +1,30 @@
+.flex-container.login {
+    display: flex;
+    max-width: 60vw;
+    max-height: 100vh;
+    margin-top: 25vh;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.flex-container.loginForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+input.login-type {
+    width: 20vw;
+}
+
+button.login-type {
+    max-width: 5vw;
+}
+
+h1.login-title {
+    font-size: 70px;
+}
