@@ -10,22 +10,43 @@
 <body>
     <h1>Game Room: <span id="roomID"></span></h1>
     <h1> Welcome, <span id="username">{{.username}}</span></h1>
-    <h2>Player Color: {{.playerColor}}</h2>
+    <h2 id="playerColor"></h2>
+    <h2 id="whoseMove"></h2>
     <div id="board" style="width: 400px"></div>
     <p id="status"></p>
     <script>
+        const chess = new Chess();
+
         // Room ID from URL
         const roomID = window.location.pathname.split("/")[2];
         document.getElementById("roomID").innerText = roomID;
 
-        const whiteID = "{{.whiteID}}";
-        const blackID = "{{.blackID}}";
-        const userID = "{{.user_id}}";
-        const isWhite = whiteID === userID;
+        const user_color = "{{.playerColor}}";
+        if (user_color === "w") {
+            document.getElementById("playerColor").innerText = "Player Color: White";
+        } else {
+            document.getElementById("playerColor").innerText = "Player Color: Black";
+        }
+
+        const fullColor = {
+            w: "white",
+            b: "black"
+        };
+
+        function updateMoveStatus() {
+            if (user_color === chess.turn()) {
+            document.getElementById("whoseMove").innerText = "Your Move";
+            } else {
+            document.getElementById("whoseMove").innerText = "Opponent's Move";
+            }
+        }
+
+        // Initial call to set the move status
+        updateMoveStatus();
 
     
         // Initialize Chess.js for move validation and game logic
-        const chess = new Chess(); // Chess.js library to manage game state
+         // Chess.js library to manage game state
     
         // Initialize WebSocket connection
         const ws = new WebSocket(`ws://localhost:8080/ws/${roomID}`);
@@ -44,6 +65,19 @@
             const result = chess.move({ from: move.source, to: move.target, promotion: 'q' });
             if (result) {
                 board.move(`${move.source}-${move.target}`); // Update board if valid
+                if (chess.in_checkmate()) {
+                    document.getElementById("status").innerText = "Checkmate!";
+                    if (user_color === chess.turn()) {
+                        alert("You suck!");
+                    } else {
+                        alert("You are the 🐐!");
+                    }
+                }
+                else {
+                    updateMoveStatus();
+                }
+
+
             } else {
                 console.error("Received invalid move from server");
             }
@@ -66,7 +100,10 @@
             pieceTheme: '/static/img/chesspieces/wikipedia/{piece}.png',
             onDrop: (source, target) => {
                 console.log(`Attempting move: ${source} -> ${target}`);
-                
+                if (chess.turn() !== user_color) {
+                    console.log("Not your turn");
+                    return "snapback"; // Not your turn
+                }
                 // Validate move locally using Chess.js
                 const move = chess.move({ from: source, to: target, promotion: 'q' });
                 if (move === null) {
@@ -76,8 +113,22 @@
     
                 // Send valid move to server
                 ws.send(JSON.stringify({ source, target }));
+                
+                // check for checkmate
+                if (chess.in_checkmate()) {
+                    document.getElementById("status").innerText = "Checkmate!";
+                    if (user_color === chess.turn()) {
+                        alert("You suck!");
+                    } else {
+                        alert("You are the 🐐!");
+                    }
+                }
+                else {
+                    updateMoveStatus(); 
+                }
                 console.log("Move sent to server:", { source, target });
             },
+            orientation: fullColor[user_color],
         };
     
         // Initialize the Chessboard
