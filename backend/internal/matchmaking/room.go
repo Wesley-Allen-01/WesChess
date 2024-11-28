@@ -2,8 +2,8 @@ package matchmaking
 
 import (
 	"WesChess/backend/internal/ws"
-	"sync"
 	"log"
+	"sync"
 )
 
 const InitialBoardState = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"

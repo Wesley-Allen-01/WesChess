@@ -178,9 +178,9 @@ func main() {
 		}
 		var playerColor string
 		if game.WhiteID == userID {
-			playerColor = "white"
+			playerColor = "w"
 		} else if game.BlackID == userID {
-			playerColor = "black"
+			playerColor = "b"
 		} else {
 			playerColor = "spectator"
 		}
