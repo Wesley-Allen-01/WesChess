@@ -3,12 +3,12 @@ package main
 import (
 	"WesChess/backend/internal/db"
 	"WesChess/backend/internal/handlers"
-	"WesChess/backend/internal/ws"
 	"WesChess/backend/internal/matchmaking"
+	"WesChess/backend/internal/ws"
 	"log"
-	"strconv"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,18 +19,18 @@ func main() {
 
 	router := gin.Default()
 
-
 	router.Static("/static", "../frontend/public")
 
 	router.LoadHTMLGlob("../frontend/public/*.html")
 
 	router.GET("/ws/:roomID", func(c *gin.Context) {
-		roomID := c.Param("roomID")                               
-		ws.HandleConnection(c.Writer, c.Request, roomID)         
+		roomID := c.Param("roomID")
+		ws.HandleConnection(c.Writer, c.Request, roomID)
 	})
 
 	router.GET("/", func(c *gin.Context) {
-		c.Redirect(302, "/register")
+		log.Printf("Redirecting to /home")
+		c.Redirect(http.StatusFound, "/home")
 	})
 
 	router.GET("/ws-test", func(c *gin.Context) {
@@ -48,14 +48,14 @@ func main() {
 	router.GET("/home", func(c *gin.Context) {
 		userID, err := c.Cookie("user_id")
 		if err != nil {
-			c.Redirect(302, "/register") 
+			c.Redirect(302, "/login")
 			return
 		}
 
 		var username string
 		err = db.DB.QueryRow("SELECT username FROM users WHERE id = ?", userID).Scan(&username)
 		if err != nil {
-			c.HTML(500, "index.html", gin.H{
+			c.HTML(500, "login.html", gin.H{
 				"error": "Failed to load user information",
 			})
 			return
@@ -66,7 +66,17 @@ func main() {
 		})
 	})
 
-	router.GET("/api/user", func (c *gin.Context) {
+	router.GET("/api/logged-in-users", func(c * gin.Context) {
+		users := make([]string, 0, len(handlers.ActiveUsers))
+		for _, username := range handlers.ActiveUsers {
+			users = append(users, username)
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"users": users,
+		})
+	})
+
+	router.GET("/api/user", func(c *gin.Context) {
 		userIDstr, err := c.Cookie("user_id")
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
@@ -119,7 +129,7 @@ func main() {
 	router.GET("/index", func(c *gin.Context) {
 		userID, err := c.Cookie("user_id")
 		if err != nil {
-			c.Redirect(302, "/register") 
+			c.Redirect(302, "/register")
 			return
 		}
 
@@ -146,7 +156,7 @@ func main() {
 		// 	return
 		// }
 		// get username from user
-		roomID , err := strconv.Atoi(roomIDstr)
+		roomID, err := strconv.Atoi(roomIDstr)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid room ID"})
 			return
@@ -177,22 +187,33 @@ func main() {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 			return
 		}
+
+		
 		var playerColor string
+		var opponentID int
 		if game.WhiteID == userID {
 			playerColor = "w"
+			opponentID = game.BlackID
 		} else if game.BlackID == userID {
 			playerColor = "b"
+			opponentID = game.WhiteID
 		} else {
 			playerColor = "spectator"
 		}
 
+
+
+
+
+
 		// Serve the game page
 		c.HTML(http.StatusOK, "game.html", gin.H{
-			"roomID": roomID,
-			"username": username,
-			"user_id": userID,
-			"whiteID": game.WhiteID,
-			"blackID": game.BlackID,
+			"roomID":      roomID,
+			"username":    username,
+			"user_id":     userID,
+			"opponentID":    opponentID,
+			"whiteID":     game.WhiteID,
+			"blackID":     game.BlackID,
 			"playerColor": playerColor,
 		})
 	})
@@ -232,10 +253,9 @@ func main() {
 
 	port := os.Getenv("PORT") // Get the port from the environment
 	if port == "" {
-    	port = "8080" // Default to 8080 for local development
+		port = "8080" // Default to 8080 for local development
 	}
 
 	log.Println("Server started on :" + port)
 	router.Run(":" + port)
 }
-

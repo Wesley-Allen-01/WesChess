@@ -6,7 +6,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+    "strconv"
 )
+
+var ActiveUsers = make(map[string]string)
 
 func HashPassword(password string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -89,6 +92,9 @@ func LoginHandler(db *sql.DB) gin.HandlerFunc {
             false,                  // Secure (true if using HTTPS)
             true,                   // HttpOnly (prevents access via JavaScript)
         )
+
+        // add to active users global var
+        ActiveUsers[strconv.Itoa(userID)] = req.Username
 
         c.Redirect(http.StatusFound, "/home")
     }

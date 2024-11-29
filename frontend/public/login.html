@@ -13,9 +13,13 @@
             <div class="flex-container loginForm">
                 <input type="text" id="username" name="username" placeholder="Username" class="login-type">
                 <input type="password" id="password" name="password" placeholder="Password" class="login-type">
+                <label>
+                    <input type="checkbox" id="showPassword"> Show Password
+                </label>
                 <button type="submit" class="login-type">Login</button>
             </div>
         </form>
+        <button id="signUpButton" class="login-type">Sign Up</button>
     </div>
 </body>
 
@@ -42,5 +46,14 @@
             const errorData = await response.json();
             alert(`Failed to login: ${errorData.error}`);
         }
+    };
+
+    document.getElementById("signUpButton").onclick = () => {
+        window.location.href = "/register";
+    };
+
+    document.getElementById("showPassword").onchange = (e) => {
+        const passwordInput = document.getElementById("password");
+        passwordInput.type = e.target.checked ? "text" : "password";
     };
 </script>

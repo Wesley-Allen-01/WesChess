@@ -35,24 +35,54 @@
                     clearInterval(pollInterval);
                     window.location.href = `/game/${data.roomID}`;
                 }
+                else {
+                    document.getElementById("searchStatus").innerText = "Searching for a match...";
+                }
             }, 3000); // Poll every 3 seconds
         }
 
         // Start polling when the page loads
         window.onload = pollMatch;
+
+
+        async function fetchUsername() {
+            const response = await fetch("/api/user", { credentials: "include" });
+            if (response.status === 401) {
+                // User is not authenticated
+                window.location.href = "/login";
+            } else {
+                const data = await response.json();
+                document.getElementById("username").innerText = data.username || "Unknown User";
+            }
+        }
+        fetchUsername();
+
+        async function fetchActiveUsers() {
+            const response = await fetch("/api/logged-in-users", { credentials: "include" });
+            const data = await response.json();
+            return data.users;
+        }
+        activeUsers = fetchActiveUsers();
+
+        async function updateActiveUsers() {
+            const users = await activeUsers;
+            const activeUsersList = document.getElementById("activeUsers");
+            activeUsersList.innerHTML = "";
+            users.forEach(user => {
+                const li = document.createElement("li");
+                li.innerText = user;
+                activeUsersList.appendChild(li);
+            });
+        }
+
+        setInterval(updateActiveUsers, 3000);
     </script>
 </head>
 <body>
     <h1>Welcome, <span id="username"></span></h1>
     <button onclick="joinQueue()">Create Game</button>
-    <script>
-        // Fetch and display the username
-        async function fetchUsername() {
-            const response = await fetch("/api/user", { credentials: "include" });
-            const data = await response.json();
-            document.getElementById("username").innerText = data.username || "Unknown User";
-        }
-        fetchUsername();
-    </script>
+    <p id="searchStatus"></p>
+    <h2>Active Users</h2>
+    <ul id="activeUsers"></ul>
 </body>
 </html>

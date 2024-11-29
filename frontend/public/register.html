@@ -16,6 +16,9 @@
             <div class="flex-container loginForm">
                 <input type="text" id="username" name="username" placeholder="Username" class="login-type">
                 <input type="password" id="password" name="password" placeholder="Password" class="login-type">
+                <label>
+                    <input type="checkbox" id="showPassword"> Show Password
+                </label>
                 <button type="submit" class="login-type">Register</button>
             </div>
         </form>
@@ -28,6 +31,11 @@
         e.preventDefault();
         const username = document.getElementById("username").value;
         const password = document.getElementById("password").value;
+        // confirm both fields are nonnull
+        if (!username || !password) {
+            alert("Please fill in both fields.");
+            return;
+        }
 
         const response = await fetch("/register", {
             method: "POST",
@@ -36,11 +44,32 @@
         });
 
         if (response.ok) {
-            alert("Registered successfully!");
-            window.location.href = "/login";
+            // alert("Registered successfully!");
+            // window.location.href = "/login";
+            // make post request to api logging user in
+            const loginResponse = await fetch("/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password }),
+            });
+
+            if (loginResponse.ok) {
+                // alert("Logged in successfully!");
+                // Redirect to the index page
+                window.location.href = "/home";
+            } else {
+                const errorData = await loginResponse.json();
+                alert(`Failed to login: ${errorData.error}`);
+            }
+            
         } else {
             alert("Failed to register.");
         }
+    };
+
+    document.getElementById("showPassword").onchange = (e) => {
+        const passwordInput = document.getElementById("password");
+        passwordInput.type = e.target.checked ? "text" : "password";
     };
 </script>
 
