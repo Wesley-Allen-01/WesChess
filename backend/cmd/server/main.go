@@ -8,6 +8,7 @@ import (
 	"log"
 	"strconv"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -228,8 +229,13 @@ func main() {
 
 	router.POST("/register", handlers.RegisterHandler(db.DB))
 	router.POST("/login", handlers.LoginHandler(db.DB))
-	log.Println("Server started on :8080")
 
-	router.Run(":8080")
+	port := os.Getenv("PORT") // Get the port from the environment
+	if port == "" {
+    	port = "8080" // Default to 8080 for local development
+	}
+
+	log.Println("Server started on :" + port)
+	router.Run(":" + port)
 }
 
