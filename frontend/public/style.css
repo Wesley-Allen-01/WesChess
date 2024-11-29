@@ -28,3 +28,7 @@ button.login-type {
 h1.login-title {
     font-size: 70px;
 }
+
+#board {
+    touch-action: none;
+}
