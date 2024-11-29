@@ -26,7 +26,22 @@ function updateMoveStatus() {
 
 updateMoveStatus();
 
-const ws = new WebSocket(`ws://localhost:8080/ws/${roomID}`);
+
+const ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
+
+let ws_url;
+
+
+if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+
+    ws_url = `${ws_scheme}://localhost:8080/ws/${roomID}`;
+} else {
+
+    ws_url = `${ws_scheme}://${window.location.host}/ws/${roomID}`;
+}
+
+
+const ws = new WebSocket(ws_url);
 
 ws.onopen = () => {
     console.log("WebSocket connected");
