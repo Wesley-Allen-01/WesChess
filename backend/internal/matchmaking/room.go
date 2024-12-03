@@ -11,6 +11,15 @@ const InitialBoardState = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 
 // Create a new game room
 func CreateGameRoom(player1, player2 int) int {
 	roomID := generateRoomID() // Generate a unique room ID
+	// ws.ActiveGames[roomID] = &ws.Game{
+	// 	RoomID:     roomID,
+	// 	WhiteID:    player1,
+	// 	BlackID:    player2,
+	// 	BoardState: InitialBoardState,
+	// 	Turn:       "white",
+	// 	Status:     "in-progress",
+	// }
+	ws.GameMutex.Lock()
 	ws.ActiveGames[roomID] = &ws.Game{
 		RoomID:     roomID,
 		WhiteID:    player1,
@@ -19,6 +28,7 @@ func CreateGameRoom(player1, player2 int) int {
 		Turn:       "white",
 		Status:     "in-progress",
 	}
+	ws.GameMutex.Unlock()
 	log.Println("LOOK AT ME")
 	log.Printf("Created game room %d with players %d and %d", roomID, player1, player2)
 	log.Printf("Active games: %v", ws.ActiveGames)
@@ -34,4 +44,10 @@ func generateRoomID() int {
 	uniqueIdCounter++
 	return uniqueIdCounter
 
+}
+
+func EndGame(roomID int) {
+	ws.GameMutex.Lock()
+	delete(ws.ActiveGames, roomID)
+	ws.GameMutex.Unlock()
 }

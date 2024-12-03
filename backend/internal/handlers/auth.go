@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
     "strconv"
+    "log"
 )
 
 var ActiveUsers = make(map[string]string)
@@ -38,12 +39,14 @@ func RegisterHandler(db *sql.DB) gin.HandlerFunc {
 
 		hashedPassword, err := HashPassword(req.Password)
 		if err != nil {
+            log.Println("Error hashing password")
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error hashing password"})
 			return
 		}
 
-		_, err = db.Exec("INSERT INTO users (username, password) VALUES (?, ?)", req.Username, hashedPassword)
+		_, err = db.Exec("INSERT INTO users (username, password, wins, draws, losses, elo) VALUES (?, ?, 0, 0, 0, 1200)", req.Username, hashedPassword)
 		if err != nil {
+            log.Println("Error inserting user into db")
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error inserting user"})
 			return
 		}

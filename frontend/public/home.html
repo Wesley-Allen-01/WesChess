@@ -4,7 +4,6 @@
     <title>Home</title>
     <script>
         let pollInterval;
-
         // Function to enqueue the user
         async function joinQueue() {
             const response = await fetch("/api/play", {
@@ -15,10 +14,14 @@
             const data = await response.json();
             if (data.message === "Match found!") {
                 // Stop polling and redirect to the game page
+                console.log("match found between players")
                 clearInterval(pollInterval);
                 window.location.href = `/game/${data.roomID}`;
             } else {
-                alert(data.message); // Likely "Waiting for a match..."
+                console.log("you should start polling here")
+                statusEl = document.getElementById("searchStatus")
+                statusEl.innerText = "Searching for a match..."
+                pollMatch();
             }
         }
 
@@ -31,18 +34,20 @@
                 });
 
                 const data = await response.json();
+                console.log(data)
                 if (data.matched) {
                     clearInterval(pollInterval);
                     window.location.href = `/game/${data.roomID}`;
                 }
                 else {
+                    console.log("polling for match")
                     document.getElementById("searchStatus").innerText = "Searching for a match...";
                 }
             }, 3000); // Poll every 3 seconds
         }
 
         // Start polling when the page loads
-        window.onload = pollMatch;
+        // window.onload = pollMatch;
 
 
         async function fetchUsername() {
@@ -65,7 +70,7 @@
         activeUsers = fetchActiveUsers();
 
         async function updateActiveUsers() {
-            const users = await activeUsers;
+            const users = await fetchActiveUsers();
             const activeUsersList = document.getElementById("activeUsers");
             activeUsersList.innerHTML = "";
             users.forEach(user => {
@@ -76,6 +81,7 @@
         }
 
         setInterval(updateActiveUsers, 3000);
+        window.onload = updateActiveUsers;
     </script>
 </head>
 <body>
