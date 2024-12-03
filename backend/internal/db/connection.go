@@ -24,7 +24,11 @@ func createTables() {
 		CREATE TABLE IF NOT EXISTS users (
     		id INTEGER PRIMARY KEY AUTOINCREMENT,
     		username TEXT NOT NULL,
-    		password TEXT NOT NULL
+    		password TEXT NOT NULL,
+			wins INTEGER NOT NULL,
+			draws INTEGER NOT NULL,
+			losses INTEGER NOT NULL,
+			elo INTEGER NOT NULL
 		);
 	`
 	_, err := DB.Exec(usersTable)

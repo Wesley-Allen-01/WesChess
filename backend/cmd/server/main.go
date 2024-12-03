@@ -5,6 +5,7 @@ import (
 	"WesChess/backend/internal/handlers"
 	"WesChess/backend/internal/matchmaking"
 	"WesChess/backend/internal/ws"
+	"WesChess/backend/internal/elo"
 	"log"
 	"net/http"
 	"os"
@@ -188,30 +189,38 @@ func main() {
 			return
 		}
 
-		
-		var playerColor string
+		// print out game contents
+		log.Printf("Game: %v", game)
+
+
+		var opponentUser string
 		var opponentID int
+		var playerColor string
 		if game.WhiteID == userID {
 			playerColor = "w"
 			opponentID = game.BlackID
+			err = db.DB.QueryRow("SELECT username FROM users WHERE id = ?", opponentID).Scan(&opponentUser)
 		} else if game.BlackID == userID {
 			playerColor = "b"
 			opponentID = game.WhiteID
+			err = db.DB.QueryRow("SELECT username FROM users WHERE id = ?", opponentID).Scan(&opponentUser)
 		} else {
 			playerColor = "spectator"
 		}
-
-
-
-
-
-
-		// Serve the game page
+		
+		if err != nil {
+			c.HTML(500, "game.html", gin.H{
+				"error": "Failed to load opponent information",
+			})
+			return
+		}
+		log.Printf("opponentUser: %s\n", opponentUser)
 		c.HTML(http.StatusOK, "game.html", gin.H{
 			"roomID":      roomID,
 			"username":    username,
 			"user_id":     userID,
-			"opponentID":    opponentID,
+			"opponent_id":    opponentID,
+			"opponent":    opponentUser,
 			"whiteID":     game.WhiteID,
 			"blackID":     game.BlackID,
 			"playerColor": playerColor,
@@ -219,6 +228,34 @@ func main() {
 	})
 
 	router.POST("/api/register", handlers.RegisterHandler(db.DB))
+
+	// post route for incrementing win or loss
+	// should take a query of w, d, or l
+	router.POST("/api/result", func(c *gin.Context) {
+		userIDstr, err := c.Cookie("user_id")
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+			return
+		}
+		userID, err := strconv.Atoi(userIDstr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+			return
+		}
+		result := c.Query("result")
+		if result == "w" {
+			elo.IncrementWins(userID, db.DB)
+		} else if result == "l" {
+			elo.IncrementLosses(userID, db.DB)
+		} else if result == "d" {
+			elo.IncrementDraws(userID, db.DB)
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid result"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Result updated"})
+	})
+
 
 	router.POST("/api/play", func(c *gin.Context) {
 		userIDstr, err := c.Cookie("user_id")
@@ -236,9 +273,10 @@ func main() {
 		p1, p2, room, match_found := matchmaking.MatchPlayers()
 		if match_found {
 			log.Printf("Match found between players %d and %d in room %d", p1, p2, room)
-			c.JSON(http.StatusOK, gin.H{"message": "Match found", "roomID": room})
+			c.JSON(http.StatusOK, gin.H{"message": "Match found!", "roomID": room})
 		} else {
 			log.Printf("No match found")
+			c.JSON(http.StatusOK, gin.H{"message": "No match found"})
 		}
 	})
 
@@ -247,6 +285,9 @@ func main() {
 			"message": "Hello, World!",
 		})
 	})
+
+	// create post route that increments either loss or win counter
+
 
 	router.POST("/register", handlers.RegisterHandler(db.DB))
 	router.POST("/login", handlers.LoginHandler(db.DB))
