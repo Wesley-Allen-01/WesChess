@@ -54,20 +54,36 @@ ws.onmessage = (event) => {
 
     
     const result = chess.move({ from: move.source, to: move.target, promotion: 'q' });
-    if (result) {
-        board.move(`${move.source}-${move.target}`); 
-        if (chess.in_checkmate()) {
-            document.getElementById("status").innerText = "Checkmate!";
-            if (user_color === chess.turn()) {
-                alert("You suck!");
-            } else {
-                alert("You are the 🐐!");
-            }
+    console.log("Result of move: ", result);
+    // if (result) {
+    //     board.move(`${move.source}-${move.target}`); 
+    //     console.log("Currently in Checkmate: ", chess.in_checkmate());
+    //     if (chess.in_checkmate()) {
+    //         document.getElementById("status").innerText = "Checkmate!";
+    //         if (user_color === chess.turn()) {
+    //             // alert("You suck!");
+    //             handleCheckmate();
+    //         } else {
+    //             // alert("You are the 🐐!");
+    //             handleCheckmate();
+    //         }
+    //     } else {
+    //         updateMoveStatus();
+    //     }
+    // } else {
+    //     console.error("Received invalid move from server");
+    // }
+    board.move(`${move.source}-${move.target}`); 
+    console.log("Currently in Checkmate: ", chess.in_checkmate());
+    if (chess.in_checkmate()) {
+        document.getElementById("status").innerText = "Checkmate!";
+        if (user_color === chess.turn()) {
+            // alert("You suck!");
+            handleCheckmate();
         } else {
-            updateMoveStatus();
-        }
-    } else {
-        console.error("Received invalid move from server");
+            // alert("You are the 🐐!");
+            handleCheckmate();
+        } 
     }
 };
 
@@ -114,16 +130,17 @@ function handleDragStart(source, piece, position, orientation) {
 
 function handleDrop(source, target) {
     console.log(`Attempting move: ${source} -> ${target}`)
+    console.log("user_color: ", user_color);
     if (chess.turn() !== user_color) {
         console.log("Not your turn");
         return "snapback"; 
     }
 
-    const move = chess.move({ from: source, to: target, promotion: 'q' });
-    if (move === null) {
-        console.log("Invalid move, snapping back");
-        return "snapback"; 
-    }
+    // const move = chess.move({ from: source, to: target, promotion: 'q' });
+    // if (move === null) {
+    //     console.log("Invalid move, snapping back");
+    //     return "snapback"; 
+    // }
 
     ws.send(JSON.stringify({ source, target }));
 
@@ -131,11 +148,12 @@ function handleDrop(source, target) {
 
     if (chess.in_checkmate()) {
         document.getElementById("status").innerText = "Checkmate!";
-        if (user_color === chess.turn()) {
-            alert("You suck!");
-        } else {
-            alert("You are the 🐐!");
-        }
+        // if (user_color === chess.turn()) {
+        //     alert("You suck!");
+        // } else {
+        //     alert("You are the 🐐!");
+        // }
+        handleCheckmate();
     }
     else {
         updateMoveStatus();
@@ -143,7 +161,32 @@ function handleDrop(source, target) {
     console.log("Move sent to server:", { source, target });
 }
 
+// create function to handle checkmate
+// this function should increment either the win or loss counter in the db
 
+
+function handleCheckmate() {
+    console.log("just called handleCheckmate()");
+    if (user_color === chess.turn()) {
+        handleGameOver("loss");
+    } else {
+        handleGameOver("win");
+    }
+}
+
+function handleGameOver(result) {
+    console.log("just called handleGameOver()");
+    if (result === "win") {
+        myModal = new bootstrap.Modal(document.getElementById('victoryModal'));
+    }
+    else if (result === "draw") {
+        myModal = new bootstrap.Modal(document.getElementById('drawModal'));
+    }
+    else {
+        myModal = new bootstrap.Modal(document.getElementById('lossModal'));
+    }
+    myModal.show();
+}
 
 
 var config = {

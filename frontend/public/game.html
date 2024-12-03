@@ -3,21 +3,73 @@
 <head>
     <title>Chess Game</title>
     <link rel="stylesheet" href="/static/chessboard/chessboard-1.0.0.css">
+    <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    />
+    <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+    ></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="/static/chessboard/chessboard-1.0.0.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.js" integrity="sha512-oprzqYFJfo4Bx/nNEcSI0xo7ggJrLc+qQ6hrS3zV/Jn0C4dsg4gu+FXW/Vm0jP9CrV7e5e6dcLUYkg3imjfjbw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script>
-        
-    </script>
 </head>
 <body>
+    <div class="modal fade" id="victoryModal" tabindex="-1" aria-labelledby="customEventModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="customEventModalLabel">Victory!!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Click below to return to the home page
+            </div>
+            <div class="modal-footer">
+                <button onclick="window.location.href = '/home'" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Return Home</button>
+            </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="drawModal" tabindex="-1" aria-labelledby="customEventModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="customEventModalLabel">Draw!!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                You drew the game! Click below to return to the home page.
+            </div>
+            <div class="modal-footer">
+                <button onclick="window.location.href = '/home'" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Return Home</button>
+            </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="lossModal" tabindex="-1" aria-labelledby="customEventModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="customEventModalLabel">You lost sucker!!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Click below to go home, or just give up...
+            </div>
+            <div class="modal-footer">
+                <button onclick="window.location.href = '/home'" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Return Home</button>
+            </div>
+            </div>
+        </div>
+    </div>
     <h1>Game Room: <span id="roomID"></span></h1>
     <h1>Welcome, <span id="username">{{.username}}</span></h1>
     <h2 id="playerColor"></h2>
     <h2 id="whoseMove"></h2>
-    <!-- Add the player color as a data attribute -->
+    <h4 id="opponent">{{.opponent}}</h4>
     <div id="board" style="width: 400px" data-player-color="{{.playerColor}}"></div>
-    <h4 id="User"></h4>
+    <h4 id="User"> {{.username}}</h4>
     <p id="status"></p>
     <!-- Include your external JavaScript file -->
     <script src="/static/chessgame.js"></script>
