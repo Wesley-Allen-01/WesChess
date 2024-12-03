@@ -17,6 +17,7 @@ const fullColor = {
 };
 
 function updateMoveStatus() {
+    console.log("Calling updateMoveStatus(), current turn: ", chess.turn());
     if (user_color === chess.turn()) {
         document.getElementById("whoseMove").innerText = "Your Move";
     } else {
@@ -48,12 +49,18 @@ ws.onopen = () => {
     document.getElementById("status").innerText = "Connected to game.";
 };
 
+let currentMoveIndex = 0;
 ws.onmessage = (event) => {
+    console.log("Current move index: ", currentMoveIndex);
+    console.log("current Fen: ", chess.fen());
     const msg = JSON.parse(event.data); 
     console.log("Received message:", msg);
-
+    // board.position(chess.fen());
     if (msg.type === "move") {
+        const move = msg;
         const result = chess.move({ from: move.source, to: move.target, promotion: 'q' });
+        board.move(`${move.source}-${move.target}`);
+        currentMoveIndex = chess.history().length;
         console.log("Result of move: ", result);
 
         board.move(`${move.source}-${move.target}`); 
@@ -68,6 +75,9 @@ ws.onmessage = (event) => {
                 // alert("You are the 🐐!");
                 handleCheckmate();
             } 
+        }
+        else {
+            updateMoveStatus();
         }
     }
     else if (msg.type === "resign") {
@@ -139,11 +149,6 @@ function handleDrop(source, target) {
 
     if (chess.in_checkmate()) {
         document.getElementById("status").innerText = "Checkmate!";
-        // if (user_color === chess.turn()) {
-        //     alert("You suck!");
-        // } else {
-        //     alert("You are the 🐐!");
-        // }
         handleCheckmate();
     }
     else {
@@ -151,9 +156,6 @@ function handleDrop(source, target) {
     }
     console.log("Move sent to server:", { source, target });
 }
-
-// create function to handle checkmate
-// this function should increment either the win or loss counter in the db
 
 
 function handleCheckmate() {
@@ -184,6 +186,63 @@ function resign() {
     document.getElementById("status").innerText = "You resigned!";
     handleGameOver("loss");
 }
+
+function showPreviousMove() {
+    const history = chess.history({ verbose: true });
+    console.log("history: ", history);
+    tempIdx = currentMoveIndex;
+    currentMoveIndex--;
+    tempChess = new Chess();
+    if (tempIdx > 0) {
+        tempIdx--;
+        const fen = getFenBeforeMove(history, currentMoveIndex);
+        console.log("mostRecentFen: ", chess.fen());
+        console.log("fenBeforeMove: ", fen);
+        tempChess.load(fen);
+        board.position(fen);
+    }
+    else {
+        console.log("No more moves to show");
+    }
+}
+
+function getFenBeforeMove(history, moveIndex) {
+    console.log("called getFenBeforeMove with move index: ", moveIndex);
+    const tempChess = new Chess();
+    for (let i = 0; i < moveIndex; i++) {
+        tempChess.move(history[i]);
+    }
+    return tempChess.fen();
+}
+
+function showNextMove() {
+    const history = chess.history({ verbose: true });
+    tempIdx = currentMoveIndex;
+    currentMoveIndex++;
+    tempChess = new Chess();
+    if (tempIdx < history.length) {
+        const fen = getFenBeforeMove(history, currentMoveIndex);
+        console.log("mostRecentFen: ", chess.fen());
+        console.log("fenBeforeMove: ", fen);
+        tempChess.load(fen);
+        board.position(fen);
+    }
+    else {
+        console.log("No more moves to show");
+    }
+}
+
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowLeft' && currentMoveIndex > 0) {
+        showPreviousMove();
+    }
+});
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowRight' && currentMoveIndex < chess.history().length) {
+        showNextMove();
+    }
+});
 
 var config = {
     position: "start",
