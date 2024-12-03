@@ -25,6 +25,10 @@ button.login-type {
     max-width: 5vw;
 }
 
+button.login-type.register {
+    margin-top: 20vh;
+}
+
 h1.login-title {
     font-size: 70px;
 }
