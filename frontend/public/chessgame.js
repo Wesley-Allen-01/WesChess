@@ -49,26 +49,31 @@ ws.onopen = () => {
 };
 
 ws.onmessage = (event) => {
-    const move = JSON.parse(event.data); 
-    console.log("Received move:", move);
+    const msg = JSON.parse(event.data); 
+    console.log("Received message:", msg);
 
-    
-    const result = chess.move({ from: move.source, to: move.target, promotion: 'q' });
-    console.log("Result of move: ", result);
+    if (msg.type === "move") {
+        const result = chess.move({ from: move.source, to: move.target, promotion: 'q' });
+        console.log("Result of move: ", result);
 
-    board.move(`${move.source}-${move.target}`); 
-    console.log("Currently in Checkmate: ", chess.in_checkmate());
-    board.position(chess.fen());
-    if (chess.in_checkmate()) {
-        document.getElementById("status").innerText = "Checkmate!";
-        if (user_color === chess.turn()) {
-            // alert("You suck!");
-            handleCheckmate();
-        } else {
-            // alert("You are the 🐐!");
-            handleCheckmate();
-        } 
+        board.move(`${move.source}-${move.target}`); 
+        console.log("Currently in Checkmate: ", chess.in_checkmate());
+        board.position(chess.fen());
+        if (chess.in_checkmate()) {
+            document.getElementById("status").innerText = "Checkmate!";
+            if (user_color === chess.turn()) {
+                // alert("You suck!");
+                handleCheckmate();
+            } else {
+                // alert("You are the 🐐!");
+                handleCheckmate();
+            } 
+        }
     }
+    else if (msg.type === "resign") {
+        handleGameOver("win");
+    }
+
 };
 
 ws.onclose = () => {
@@ -127,7 +132,8 @@ function handleDrop(source, target) {
     //     return "snapback"; 
     // }
 
-    ws.send(JSON.stringify({ source, target }));
+    ws.send(JSON.stringify({ type: "move", source, target }));
+
 
     clearHighlights();
 
@@ -173,6 +179,11 @@ function handleGameOver(result) {
     myModal.show();
 }
 
+function resign() {
+    ws.send(JSON.stringify({ type: "resign" }));
+    document.getElementById("status").innerText = "You resigned!";
+    handleGameOver("loss");
+}
 
 var config = {
     position: "start",
