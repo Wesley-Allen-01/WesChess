@@ -55,26 +55,10 @@ ws.onmessage = (event) => {
     
     const result = chess.move({ from: move.source, to: move.target, promotion: 'q' });
     console.log("Result of move: ", result);
-    // if (result) {
-    //     board.move(`${move.source}-${move.target}`); 
-    //     console.log("Currently in Checkmate: ", chess.in_checkmate());
-    //     if (chess.in_checkmate()) {
-    //         document.getElementById("status").innerText = "Checkmate!";
-    //         if (user_color === chess.turn()) {
-    //             // alert("You suck!");
-    //             handleCheckmate();
-    //         } else {
-    //             // alert("You are the 🐐!");
-    //             handleCheckmate();
-    //         }
-    //     } else {
-    //         updateMoveStatus();
-    //     }
-    // } else {
-    //     console.error("Received invalid move from server");
-    // }
+
     board.move(`${move.source}-${move.target}`); 
     console.log("Currently in Checkmate: ", chess.in_checkmate());
+    board.position(chess.fen());
     if (chess.in_checkmate()) {
         document.getElementById("status").innerText = "Checkmate!";
         if (user_color === chess.turn()) {
@@ -120,6 +104,7 @@ function handleDragStart(source, piece, position, orientation) {
     }
 
     const legal_moves = chess.moves({ square: source });
+    console.log("Legal moves: ", legal_moves);
     if (legal_moves.length === 0) {
         return false;
     }
