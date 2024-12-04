@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"log"
+	"WesChess/backend/internal/handlers"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -35,7 +36,16 @@ func createTables() {
 	if err != nil {
 		log.Fatalf("Failed to create users table: %v", err)
 	}
-
+	
+	hashedPassword, err := handlers.HashPassword("wes")
+	if err != nil {
+		log.Fatalf("Failed to hash password: %v", err)
+	}
+	_, err = DB.Exec(`INSERT INTO users (username, password, wins, draws, losses, elo) VALUES ("wes", ?, 0, 0, 0, 2890);`, hashedPassword)
+	if err != nil {
+		log.Fatalf("Failed to insert user into users table: %v", err)
+	}
+	log.Println("Successfully created users table and added wes user")
 	gamesTable := `
 		DROP TABLE IF EXISTS games;
 		CREATE TABLE IF NOT EXISTS games (
