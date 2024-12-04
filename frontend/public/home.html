@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+    <link rel="stylesheet" href="static/style.css">
+
     <title>Home</title>
     <script>
         let pollInterval;
@@ -82,13 +85,36 @@
 
         setInterval(updateActiveUsers, 3000);
         window.onload = updateActiveUsers;
+
+
+        // document.getElementById("logoutLink").addEventListener("click", function() {
+        //     alert("Link clicked!");
+        // });
+
+
     </script>
 </head>
 <body>
-    <h1>Welcome, <span id="username"></span></h1>
-    <button onclick="joinQueue()">Create Game</button>
-    <p id="searchStatus"></p>
-    <h2>Active Users</h2>
-    <ul id="activeUsers"></ul>
+    <div class="flex-container navbar">
+        <img src="static/img/WesChess Logo.png" class="logo">
+        <a class="logoutLink "id="logoutLink">logout</a>
+    </div>
+    <div class="flex-container home">
+        <img src="static/img/static chess board.png" class="staticChessBoard">
+        <div class="flex-container information">
+            <h1>Welcome, <span id="username"></span></h1>
+            <button onclick="joinQueue()" class="createGameButton">Create Game</button>
+            <p id="searchStatus"></p>
+            <h2>Active Users</h2>
+            <ul id="activeUsers"></ul>
+        </div>
+    </div>
 </body>
+
+<script>
+    document.getElementById("logoutLink").onclick = () => {
+        window.location.href = "/login";
+    };
+</script>
+
 </html>
