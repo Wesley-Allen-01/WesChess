@@ -24,7 +24,24 @@ input.login-type {
 }
 
 button.login-type {
-    max-width: 5vw;
+    max-width: 8vw;
+    min-height: 20px;
+    color: white;
+    background-color: gray;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 4px;
+    transition-duration: 0.4s;
+    border: 2px solid gray;
+}
+
+button.login-type:hover {
+    background-color: white; /* Green */
+    color: gray;
+    border: 2px solid gray;
 }
 
 button.login-type.register {
@@ -186,6 +203,7 @@ h1.login-title {
     height: 10vh;
     position: absolute;
     bottom: 0;
+    left: 0;
     display: flex;
 }
 
