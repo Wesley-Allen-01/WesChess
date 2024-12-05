@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" href="/static/style.css">
 
     <title>Chess Game</title>
 
@@ -16,6 +15,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="/static/chessboard/chessboard-1.0.0.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.js" integrity="sha512-oprzqYFJfo4Bx/nNEcSI0xo7ggJrLc+qQ6hrS3zV/Jn0C4dsg4gu+FXW/Vm0jP9CrV7e5e6dcLUYkg3imjfjbw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="modal fade" id="victoryModal" tabindex="-1" aria-labelledby="customEventModalLabel" aria-hidden="true">
@@ -66,16 +66,50 @@
             </div>
         </div>
     </div>
-    <h1>Game Room: <span id="roomID"></span></h1>
-    <h1>Welcome, <span id="username">{{.username}}</span></h1>
-    <h2 id="playerColor"></h2>
-    <h2 id="whoseMove"></h2>
-    <h4 id="opponent">{{.opponent}}</h4>
-    <div id="board" style="width: 400px" data-player-color="{{.playerColor}}"></div>
-    <h4 id="User"> {{.username}}</h4>
-    <button onclick="resign()">Resign</button>
-    <p id="status"></p>
+
+
+
+
+
+
+
+    <div class="flex-container navbar">
+        <img src="/static/img/WesChess Logo.png" class="logo">
+        <a class="logoutLink "id="logoutLink">logout</a>
+    </div>
+    <div class="flex-container game">
+        <div class="flex-container row userInfo">
+            <h4 id="opponent">{{.opponent}}</h4>
+        </div>
+        <div class="flex-container row">
+            <div id="board" style="width: 400px" data-player-color="{{.playerColor}}"></div>
+
+
+            <div class="flex-container gameInformation">
+                <p id="status"></p>
+                <h4>Game Room: <span id="roomID"></span></h1>
+                <!-- <h1>Welcome, <span id="username">{{.username}}</span></h1> -->
+                <h2 id="playerColor"></h2>
+                <h2 id="whoseMove" style="font-size:large; margin-top: 20px"></h2>
+                <button onclick="resign()" class="resignButton">Resign</button>
+
+            </div>
+        </div>
+        <div class="flex-container row userInfo">
+            <h4 id="User"> {{.username}}</h4>
+        </div>
+    </div>
+
+    <div class="flex-container credits">
+        <p style="position: relative; top: 20%; left: 100px; font-size: small;">Developed by Wesley Allen and William van Vuuren</p>
+    </div>
+    
     <!-- Include your external JavaScript file -->
     <script src="/static/chessgame.js"></script>
+    <script>
+        document.getElementById("logoutLink").onclick = () => {
+            window.location.href = "/login";
+        };
+    </script>
 </body>
 </html>

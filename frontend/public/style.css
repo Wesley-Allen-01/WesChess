@@ -4,7 +4,7 @@
     display: flex;
     max-width: 60vw;
     max-height: 100vh;
-    margin-top: 25vh;
+    margin-top: 20vh;
     justify-content: center;
     align-items: center;
     flex-direction: column;
@@ -28,7 +28,7 @@ button.login-type {
 }
 
 button.login-type.register {
-    margin-top: 20vh;
+    margin-top: 15vh;
 }
 
 h1.login-title {
@@ -115,11 +115,79 @@ h1.login-title {
 
 
 
+/* ====================== GAME ====================== */
+
+.flex-container.game {
+    height: 100%;
+    display: flex;
+    max-width: 60vw;
+    margin-left: auto;
+    margin-right: auto;
+    justify-content: space-around;
+    flex-direction: column;
+    position: relative;
+    top: 10vh;
+}
+
+.flex-container.row {
+    height: 100%;
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    min-width: 60vw;
+    padding: 5px 55px 5px;
+}
 
 
+.flex-container.gameInformation {
+    flex-direction: column;
+    height: 100%;
+    width: 40%;
+}
+
+.resignButton {
+    color: white;
+    background-color: rgb(237, 90, 90);
+    width: 200px !important;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 4px;
+    transition-duration: 0.4s;
+    border: 2px solid rgb(237, 90, 90);
+    margin-top: 160px;
+
+}
+
+.resignButton:hover {
+    background-color: white; /* Green */
+    color: rgb(237, 90, 90);
+    border: 2px solid rgb(237, 90, 90);
+}
 
 
+.flex-container.row.userInfo {
+    height: 100%;
+    width: 400px;
+    flex-direction: row;
+    justify-content: space-between;
+}
 
+
+.h2 {
+    font-size: small !important;
+}
+
+
+.flex-container.credits {
+    width: 100%;
+    height: 10vh;
+    position: absolute;
+    bottom: 0;
+    display: flex;
+}
 
 
 
